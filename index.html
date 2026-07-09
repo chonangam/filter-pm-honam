@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filter PM 호남</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍊</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* iOS 색상 시스템 */
+            --ios-blue: #E8590C;
+            --ios-blue-hover: #c9480a;
+            --ios-blue-light: #ffeadd;
+            --ios-red: #FF3B30;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-purple: #AF52DE;
+            --ios-yellow: #FFCC00;
+            --ios-pink: #FF2D55;
+
+            /* 텍스트 */
+            --text-primary: #1d1d1f;
+            --text-secondary: #6e6e73;
+            --text-tertiary: #a1a1a6;
+
+            /* 배경 - 연한 민트 베이스 */
+            --bg-app: #fdf5ec;
+            --bg-primary: #ffffff;
+            --bg-secondary: #fdf8f1;
+            --bg-hover: #faeee0;
+            --bg-mint-soft: #fbeeda;
+
+            /* 테두리 */
+            --border-color: #e8ecef;
+            --border-soft: #f0f2f4;
+
+            /* 주말 색상 */
+            --weekend-sun: #FF3B30;
+            --weekend-sat: #007AFF;
+
+            /* 그림자 */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 6px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        body {
+            font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Apple SD Gothic Neo', system-ui, sans-serif;
+            background: var(--bg-app);
+            min-height: 100vh;
+            color: var(--text-primary);
+            font-weight: 500;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.01em;
+        }
+
+        #statusBar {
+            max-width: 1200px; margin: 0 auto;
+            padding: 12px 24px;
+            display: flex; align-items: center; gap: 8px;
+            font-size: 12px; color: var(--text-secondary);
+            font-weight: 500;
+        }
+        #statusDot {
+            width: 8px; height: 8px; border-radius: 50%; background: var(--text-tertiary);
+            transition: background 0.3s;
+        }
+        #statusDot.ok   { background: var(--ios-green); box-shadow: 0 0 0 3px rgba(52,199,89,0.15); }
+        #statusDot.err  { background: var(--ios-red); box-shadow: 0 0 0 3px rgba(255,59,48,0.15); }
+        #statusDot.wait { background: var(--ios-yellow); animation: blink 1s infinite; }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        #realtimeBadge {
+            display: none; margin-left: auto;
+            background: rgba(255,59,48,0.1) !important;
+            color: var(--ios-red);
+            padding: 4px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px; margin: 0 auto;
+            background: var(--bg-primary);
+            padding: 32px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            margin-top: 12px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            text-align: center; color: var(--text-primary);
+            margin-bottom: 28px; font-size: 32px; font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .input-section {
+            background: var(--bg-mint-soft);
+            padding: 18px;
+            border-radius: 14px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-soft);
+        }
+        .input-group { display: flex; gap: 10px; margin-bottom: 0; flex-wrap: wrap; }
+
+        input[type="text"], input[type="date"], select {
+            flex: 1; padding: 12px 14px; border: 1px solid var(--border-color);
+            border-radius: 10px; font-size: 15px; background: var(--bg-primary);
+            font-family: inherit; font-weight: 500;
+            color: var(--text-primary);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        input[type="date"]::placeholder,
+        input[type="text"]::placeholder { color: var(--text-tertiary); font-weight: 500; }
+        input[type="date"]::-webkit-datetime-edit { color: var(--text-tertiary); }
+        input[type="date"]:valid::-webkit-datetime-edit { color: var(--text-primary); }
+        input[type="text"]:focus, input[type="date"]:focus, select:focus {
+            outline: none;
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+        }
+
+        button {
+            padding: 12px 24px; background: var(--ios-blue); color: white;
+            border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s, box-shadow 0.2s;
+            font-family: inherit;
+            letter-spacing: -0.01em;
+        }
+        button:hover {
+            background: var(--ios-blue-hover);
+            box-shadow: 0 2px 8px rgba(0,122,255,0.25);
+        }
+        button:active { transform: scale(0.97); }
+        button:disabled { background: var(--text-tertiary); cursor: not-allowed; box-shadow: none; }
+
+        .month-navigation {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 16px; padding: 0 4px;
+        }
+        .month-navigation button {
+            padding: 8px 14px; font-size: 18px; font-weight: 600;
+            background: var(--bg-secondary); color: var(--ios-blue);
+            border: none;
+            border-radius: 10px;
+            min-width: 44px;
+            line-height: 1;
+        }
+        .month-navigation button:hover {
+            background: var(--bg-mint-soft);
+            box-shadow: none;
+        }
+        .current-month {
+            font-size: 22px; font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .calendar-header {
+            text-align: center; font-weight: 600; padding: 10px 4px;
+            font-size: 12px;
+            letter-spacing: 0.03em;
+            color: var(--text-secondary);
+            background: transparent;
+        }
+        .calendar-header:nth-child(1) { color: var(--weekend-sun); }
+        .calendar-header:nth-child(7) { color: var(--weekend-sat); }
+
+        .calendar-day {
+            min-height: 110px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 8px 8px 6px;
+            display: flex; flex-direction: column;
+            transition: all 0.15s;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid transparent;
+        }
+        .calendar-day:hover {
+            background: var(--bg-mint-soft);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        .calendar-day.other-month {
+            background: transparent;
+            opacity: 0.4;
+        }
+        .calendar-day.other-month .day-number { color: var(--text-tertiary); }
+
+        .calendar-day.today .day-number {
+            background: var(--ios-red);
+            color: white;
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 2px 6px rgba(255,59,48,0.3);
+        }
+
+        .calendar-day.selected {
+            background: var(--ios-blue-light);
+            border-color: var(--ios-blue);
+            z-index: 2;
+            box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+        }
+
+        .day-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            padding: 2px 4px;
+            align-self: flex-start;
+            line-height: 1.4;
+            margin-bottom: 4px;
+        }
+        .calendar-day:nth-child(7n+1):not(.today) .day-number { color: var(--weekend-sun); }
+        .calendar-day:nth-child(7n):not(.today) .day-number { color: var(--weekend-sat); }
+
+        .reminder-badge {
+            font-size: 11px;
+            padding: 4px 8px;
+            margin-top: 3px;
+            line-height: 1.3;
+            text-align: left;
+            word-break: break-word;
+            background: var(--ios-blue);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .badge-kimoto { background: var(--ios-red); }
+        .badge-sibata { background: var(--ios-green); }
+        .badge-metone { background: var(--ios-orange); }
+        .badge-em     { background: var(--ios-purple); }
+
+        .reminder-badge.completed {
+            background: var(--text-tertiary) !important;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .check-mark {
+            font-size: 14px; text-align: center;
+            color: var(--ios-green); margin-top: 2px;
+            font-weight: 700;
+        }
+
+        .reminder-list {
+            margin-top: 36px;
+            background: var(--bg-mint-soft);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-soft);
+        }
+        .reminder-list h2 {
+            font-size: 20px; font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .reminder-item {
+            background: var(--bg-primary);
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid var(--ios-blue);
+            transition: all 0.15s;
+            box-shadow: var(--shadow-sm);
+        }
+        .reminder-item:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .reminder-item.completed {
+            opacity: 0.55;
+            border-left-color: var(--ios-green);
+        }
+        .reminder-item strong {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+        .reminder-item small {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .delete-btn {
+            background: rgba(255,59,48,0.08) !important;
+            color: var(--ios-red);
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .delete-btn:hover {
+            background: var(--ios-red) !important;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255,59,48,0.3);
+        }
+
+        .modal {
+            display: none; position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s;
+            align-items: center; justify-content: center; overflow-y: auto;
+        }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .modal-content {
+            background: var(--bg-primary); margin: 10px auto;
+            padding: 24px; border-radius: 18px;
+            width: 90%; max-width: 480px;
+            box-shadow: var(--shadow-lg);
+            animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideIn { from{transform:translateY(-10px) scale(0.96);opacity:0} to{transform:translateY(0) scale(1);opacity:1} }
+        .modal-header {
+            font-size: 18px; font-weight: 700; margin-bottom: 14px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .date-picker { display: flex; flex-direction: column; gap: 10px; }
+        .modal-buttons { display: flex; gap: 8px; margin-top: 16px; justify-content: flex-end; }
+        .modal-buttons button { flex: none; min-width: 88px; }
+        .cancel-btn {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary);
+        }
+        .cancel-btn:hover { background: var(--border-soft) !important; box-shadow: none; }
+
+        .modal-calendar-day {
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: all 0.15s;
+        }
+        .modal-calendar-day:hover { background: var(--bg-mint-soft); }
+        .modal-calendar-day.selected-in-modal {
+            background: var(--ios-blue);
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 2px 6px rgba(0,122,255,0.3);
+        }
+        .modal-calendar-day.other-month { color: var(--text-tertiary); pointer-events: none; }
+        .modal-calendar-day.today-in-modal {
+            color: var(--ios-red);
+            font-weight: 700;
+        }
+        .modal-calendar-day.selected-in-modal.today-in-modal { color: white; }
+        .modal-calendar-header {
+            font-weight: 600; text-align: center; padding: 8px 0;
+            font-size: 11px; color: var(--text-secondary);
+            letter-spacing: 0.03em;
+        }
+
+        .confirm-modal {
+            display: none; position: fixed; z-index: 2000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            animation: fadeIn 0.2s;
+            align-items: center; justify-content: center;
+        }
+        .confirm-modal-content {
+            background: var(--bg-primary); margin: 0;
+            padding: 28px; border-radius: 18px;
+            width: 90%; max-width: 400px;
+            box-shadow: var(--shadow-lg);
+            text-align: center; animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .confirm-modal-header {
+            font-size: 18px; font-weight: 700; margin-bottom: 12px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+        .confirm-modal-message {
+            font-size: 15px; margin-bottom: 24px;
+            color: var(--text-secondary); line-height: 1.5;
+            font-weight: 500;
+        }
+        .confirm-modal-buttons { display: flex; gap: 8px; justify-content: center; }
+        .confirm-yes-btn {
+            background: var(--ios-red);
+            padding: 10px 24px; font-size: 15px; font-weight: 600;
+        }
+        .confirm-yes-btn:hover { background: #d32f27; box-shadow: 0 2px 8px rgba(255,59,48,0.3); }
+        .confirm-no-btn {
+            background: var(--bg-secondary) !important;
+            color: var(--text-primary);
+            padding: 10px 24px; font-size: 15px; font-weight: 600;
+        }
+        .confirm-no-btn:hover { background: var(--border-soft) !important; box-shadow: none; }
+
+        #loadingOverlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(245,251,248,0.85);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        #loadingOverlay.show { display: flex; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border-soft);
+            border-top-color: var(--ios-blue);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        .search-section { margin-bottom: 16px; }
+        .search-wrapper {
+            display: flex; align-items: center; gap: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-soft);
+            border-radius: 12px;
+            padding: 0 14px;
+            transition: all 0.2s;
+        }
+        .search-wrapper:focus-within {
+            background: var(--bg-primary);
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+        }
+        .search-icon { font-size: 14px; margin-right: 8px; flex-shrink: 0; color: var(--text-secondary); }
+        #searchInput {
+            flex: 1; border: none; background: transparent;
+            padding: 12px 4px; font-size: 15px;
+            font-family: inherit; font-weight: 500;
+            color: var(--text-primary); outline: none;
+            letter-spacing: -0.01em;
+        }
+        #searchInput::placeholder { color: var(--text-tertiary); font-weight: 500; }
+        .search-clear {
+            background: var(--text-tertiary); border: none; color: white;
+            font-size: 11px; width: 20px; height: 20px;
+            cursor: pointer;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            padding: 0; line-height: 1;
+        }
+        .search-clear:hover { background: var(--text-secondary); }
+        .search-info {
+            font-size: 12px; color: var(--ios-blue); margin-top: 8px;
+            padding-left: 14px; min-height: 18px;
+            font-family: inherit; font-weight: 600;
+        }
+
+        .pin-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-app);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 10000;
+        }
+        .pin-box {
+            background: var(--bg-primary); padding: 44px 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            max-width: 380px; width: 90%;
+        }
+        .pin-box h2 {
+            margin-bottom: 8px; color: var(--text-primary);
+            font-size: 26px; font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+        .pin-box .pin-subtitle {
+            color: var(--text-secondary); font-size: 14px; margin-bottom: 28px;
+            font-weight: 500;
+        }
+        .pin-input {
+            width: 100%; padding: 16px; font-size: 22px; text-align: center;
+            letter-spacing: 14px; border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-family: inherit; font-weight: 700;
+            margin-bottom: 10px; box-sizing: border-box;
+            color: var(--text-primary);
+            background: var(--bg-secondary);
+        }
+        .pin-input:focus {
+            outline: none; border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.12);
+            background: var(--bg-primary);
+        }
+        .pin-error { color: var(--ios-red); font-size: 13px; min-height: 18px; margin-bottom: 14px; font-weight: 600; }
+        .pin-submit {
+            width: 100%; padding: 13px;
+            font-size: 15px; font-weight: 600;
+            background: var(--ios-blue); color: white;
+            border: none; border-radius: 12px;
+            cursor: pointer; font-family: inherit;
+            letter-spacing: -0.01em;
+        }
+        .pin-submit:hover {
+            background: var(--ios-blue-hover);
+            box-shadow: 0 4px 14px rgba(0,122,255,0.3);
+        }
+        .pin-submit:active { transform: scale(0.98); }
+        .pin-submit:disabled { background: var(--text-tertiary); cursor: not-allowed; box-shadow: none; }
+        .pin-remember {
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; margin-top: 18px; font-size: 13px; color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .reminder-list-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 18px; flex-wrap: wrap; gap: 10px;
+        }
+        .reminder-list-header h2 { margin: 0; }
+        .backup-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+        .backup-btn {
+            padding: 8px 14px;
+            font-size: 12px;
+            font-family: inherit;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.15s;
+            letter-spacing: -0.01em;
+            box-shadow: var(--shadow-sm);
+        }
+        .backup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+        .backup-btn:active { transform: scale(0.97); }
+        .export-btn { background: rgba(52,199,89,0.12); color: var(--ios-green); }
+        .export-btn:hover { background: var(--ios-green); color: white; box-shadow: 0 2px 8px rgba(52,199,89,0.3); }
+        .import-btn { background: rgba(0,122,255,0.12); color: var(--ios-blue); }
+        .import-btn:hover { background: var(--ios-blue); color: white; box-shadow: 0 2px 8px rgba(0,122,255,0.3); }
+        .local-btn  { background: rgba(255,149,0,0.12); color: var(--ios-orange); }
+        .local-btn:hover { background: var(--ios-orange); color: white; box-shadow: 0 2px 8px rgba(255,149,0,0.3); }
+        .csv-btn    { background: rgba(175,82,222,0.12); color: var(--ios-purple); }
+        .csv-btn:hover { background: var(--ios-purple); color: white; box-shadow: 0 2px 8px rgba(175,82,222,0.3); }
+
+        .badge-search-match {
+            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ios-blue);
+            position: relative; z-index: 1;
+        }
+        .badge-search-dim { opacity: 0.25; }
+        .day-search-match {
+            background: var(--ios-blue-light) !important;
+            border-color: var(--ios-blue) !important;
+        }
+        .day-search-dim { opacity: 0.4; }
+
+        .date-placeholder-mobile { display: none; }
+        @media (max-width: 768px) {
+            .date-placeholder-mobile { display: block; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 0; background: var(--bg-primary); }
+
+            #statusBar { font-size: 11px; padding: 10px 14px; }
+
+            .container {
+                padding: 16px 12px;
+                border-radius: 0;
+                width: 100%;
+                box-sizing: border-box;
+                overflow: hidden;
+                box-shadow: none;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+
+            h1 { font-size: 22px; margin-bottom: 16px; }
+
+            .input-section { padding: 12px; margin-bottom: 16px; border-radius: 12px; }
+            .input-group { flex-direction: column; gap: 8px; }
+            .input-group input,
+            .input-group select,
+            .input-group button {
+                width: 100%; flex: none;
+                font-size: 14px; padding: 11px;
+            }
+
+            .month-navigation { margin-bottom: 10px; }
+            .month-navigation button { padding: 6px 12px; font-size: 16px; min-width: 40px; }
+            .current-month { font-size: 18px; }
+
+            .calendar {
+                gap: 3px;
+                margin-top: 6px;
+                width: 100%;
+            }
+            .calendar-header {
+                padding: 6px 0;
+                font-size: 10px;
+            }
+            .calendar-day {
+                padding: 3px;
+                min-height: 54px;
+                overflow: hidden;
+                border-radius: 8px;
+            }
+            .day-number { font-size: 11px; padding: 1px 3px; }
+            .calendar-day.today .day-number {
+                width: 20px; height: 20px; font-size: 11px;
+            }
+            .reminder-badge {
+                font-size: 9px;
+                padding: 2px 4px;
+                border-radius: 5px;
+                margin-top: 2px;
+                line-height: 1.2;
+                word-break: break-all;
+                font-weight: 600;
+            }
+            .check-mark { font-size: 11px; }
+
+            .search-wrapper { padding: 0 12px; border-radius: 10px; }
+            #searchInput { font-size: 13px; padding: 10px 4px; }
+            .search-info { padding-left: 12px; font-size: 11px; }
+
+            .reminder-list { padding: 14px; margin-top: 20px; border-radius: 14px; }
+            .reminder-list-header { margin-bottom: 12px; }
+            .backup-btn { padding: 6px 10px; font-size: 11px; }
+            .reminder-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+                padding: 12px;
+                border-radius: 10px;
+            }
+            .reminder-item small { font-size: 11px; }
+            .delete-btn { align-self: flex-end; padding: 6px 12px; font-size: 12px; }
+
+            .modal-content { margin: 10px auto; padding: 20px 16px; width: 94%; border-radius: 16px; }
+            .modal-header { font-size: 17px; margin-bottom: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- PIN 게이트 -->
+<div class="pin-overlay" id="pinOverlay">
+    <div class="pin-box">
+        <h2>🍊 Filter PM 호남</h2>
+        <div class="pin-subtitle">PIN 번호를 입력하세요</div>
+        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4"
+               class="pin-input" id="pinInput" placeholder="● ● ● ●" autocomplete="off">
+        <div class="pin-error" id="pinError"></div>
+        <button class="pin-submit" id="pinSubmit" onclick="checkPin()">확인</button>
+        <label class="pin-remember">
+            <input type="checkbox" id="pinRemember" checked>
+            <span>24시간 동안 기억</span>
+        </label>
+    </div>
+</div>
+
+<!-- 연결 상태 표시줄 -->
+<div id="statusBar" style="display:none;">
+    <div id="statusDot" class="wait"></div>
+    <span id="statusText">연결 중…</span>
+    <span id="realtimeBadge" style="display:none;margin-left:auto;background:rgba(255,255,255,0.2);padding:2px 10px;border-radius:20px;">🔴 실시간 연결됨</span>
+</div>
+
+<!-- 메인 앱 -->
+<div class="container" style="display:none;">
+    <h1>🍊 Filter PM 호남</h1>
+
+    <div class="input-section">
+        <div class="input-group">
+            <div style="flex:1;position:relative;">
+                <input type="date" id="baseDate" style="width:100%;" oninput="toggleDatePlaceholder(this)" onfocus="toggleDatePlaceholder(this)" onblur="toggleDatePlaceholder(this)">
+                <span id="datePlaceholder" class="date-placeholder-mobile" style="position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;font-family:inherit;font-weight:400;font-size:14px;color:#9aa0a6;">교체일자를 입력하세요</span>
+            </div>
+            <input type="text" id="locationInput" placeholder="측정소명을 입력하세요">
+            <select id="filterType">
+                <option value="">필터 종류를 선택하세요</option>
+                <option value="EM-PM10">EM PM-10 (60일)</option>
+                <option value="EM-PM2.5">EM PM-2.5 (60일)</option>
+                <option value="BAM1022-PM2.5">BAM-1022 PM-2.5 (40일)</option>
+                <option value="PM-PM10">PM-10 (70일)</option>
+                <option value="PM-PM2.5">PM-2.5 (70일)</option>
+                <option value="kimoto-PM10">Kimoto PM-10 (90일)</option>
+                <option value="kimoto-PM2.5">Kimoto PM-2.5 (90일)</option>
+            </select>
+            <button onclick="addReminder()">추가하기</button>
+        </div>
+    </div>
+
+    <div class="month-navigation">
+        <button onclick="previousMonth()" title="이전 달">‹</button>
+        <div class="current-month" id="currentMonth"></div>
+        <button onclick="nextMonth()" title="다음 달">›</button>
+    </div>
+
+    <!-- 검색 영역 -->
+    <div class="search-section">
+        <div class="search-wrapper">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="측정소명으로 검색…" oninput="onSearch(this.value)">
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+        </div>
+        <div id="searchInfo" class="search-info"></div>
+    </div>
+
+    <div class="calendar" id="calendar"></div>
+
+    <div class="reminder-list">
+        <div class="reminder-list-header">
+            <h2>🍊 호남 필터교체 목록</h2>
+            <div class="backup-buttons">
+                <button class="backup-btn csv-btn" onclick="exportCSV()">📊 CSV 다운로드</button>
+                <button class="backup-btn export-btn" onclick="exportJSON()">📥 백업 다운로드</button>
+                <button class="backup-btn import-btn" onclick="document.getElementById('importFile').click()">📤 JSON 복원</button>
+                <button class="backup-btn local-btn" onclick="restoreFromLocalBackup()">💾 로컬 복원</button>
+                <input type="file" id="importFile" accept=".json,application/json" style="display:none;" onchange="importJSON(event)">
+            </div>
+        </div>
+        <div id="reminderList"></div>
+    </div>
+</div>
+
+<!-- 날짜 선택 모달 -->
+<div id="dateModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">📅 교체 예정일 선택</div>
+        <div class="date-picker">
+            <div>
+                <strong id="modalLocation"></strong>
+                <p style="color:#666;margin-top:5px;">캘린더에서 날짜를 클릭하거나 직접 입력하세요</p>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin:6px 0;">
+                <button type="button" onclick="previousModalMonth()" style="padding:5px 15px;">◀</button>
+                <strong id="modalMonthDisplay" style="font-size:18px;"></strong>
+                <button type="button" onclick="nextModalMonth()" style="padding:5px 15px;">▶</button>
+            </div>
+            <div id="modalCalendar" style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px;"></div>
+            <input type="date" id="selectedDate" style="padding:8px 12px;">
+        </div>
+        <div class="modal-buttons">
+            <button class="cancel-btn" onclick="closeModal()">취소</button>
+            <button onclick="confirmDate()">확인</button>
+        </div>
+    </div>
+</div>
+
+<!-- 삭제 확인 모달 -->
+<div id="confirmModal" class="confirm-modal">
+    <div class="confirm-modal-content">
+        <div class="confirm-modal-header">⚠️ 삭제 확인</div>
+        <div class="confirm-modal-message" id="confirmMessage">이 필터교체를 삭제하시겠습니까?</div>
+        <div class="confirm-modal-buttons">
+            <button class="confirm-no-btn" onclick="closeConfirmModal()">아니요</button>
+            <button class="confirm-yes-btn" onclick="confirmDelete()">예</button>
+        </div>
+    </div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loadingOverlay"><div class="spinner"></div></div>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ═══════════════════════════════════════
+//  Supabase 연결 정보 (하드코딩)
+// ═══════════════════════════════════════
+const SUPABASE_URL = 'https://jtyltglbijjedecpffjb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0eWx0Z2xiaWpqZWRlY3BmZmpiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MTkzOTYsImV4cCI6MjA4OTk5NTM5Nn0.7fC1hTVgA6gyXeAJr7NU3wXDq89LECe6R6q4jJ9zuTk';
+
+// ═══════════════════════════════════════
+//  앱 상태
+// ═══════════════════════════════════════
+let sb = null;
+let realtimeChannel = null;
+let reminders = [];
+let currentDate = new Date();
+let selectedDate = null;
+let pendingReminder = null;
+let modalCalendarDate = new Date();
+let modalSelectedDate = null;
+let deleteToConfirm = null;
+let searchQuery = '';
+
+const weekDays = ['일','월','화','수','목','금','토'];
+const filterDays  = { 'EM':60, 'BAM1022':40, 'PM':70, 'kimoto':90 };
+const filterNames = { 'EM':'EM', 'BAM1022':'BAM-1022', 'PM':'PM', 'kimoto':'Kimoto' };
+
+// ═══════════════════════════════════════
+//  Supabase 초기화
+// ═══════════════════════════════════════
+async function initApp() {
+    setStatus('wait', '연결 중…');
+    try {
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { error } = await sb.from('filter_reminders_honam').select('id', { count:'exact', head:true });
+        if (error) throw error;
+        setStatus('ok', 'Supabase 연결됨 ✅');
+        subscribeRealtime();
+        await loadReminders();
+    } catch(e) {
+        setStatus('err', '연결 실패: ' + e.message);
+        renderCalendar();
+    }
+}
+
+function setStatus(state, msg) {
+    document.getElementById('statusDot').className = state;
+    document.getElementById('statusText').textContent = msg;
+}
+
+// ═══════════════════════════════════════
+//  실시간 구독
+// ═══════════════════════════════════════
+function subscribeRealtime() {
+    if (realtimeChannel) sb.removeChannel(realtimeChannel);
+    realtimeChannel = sb
+        .channel('filter_realtime')
+        .on('postgres_changes', { event:'*', schema:'public', table:'filter_reminders_honam' }, onRealtimeEvent)
+        .subscribe(status => {
+            if (status === 'SUBSCRIBED') {
+                document.getElementById('realtimeBadge').style.display = 'inline';
+            }
+        });
+}
+
+function onRealtimeEvent({ eventType, new: n, old: o }) {
+    if (eventType === 'INSERT') {
+        if (!reminders.find(x => x.id === Number(n.id))) reminders.push(toReminder(n));
+    } else if (eventType === 'UPDATE') {
+        const idx = reminders.findIndex(x => x.id === Number(n.id));
+        if (idx !== -1) reminders[idx] = toReminder(n);
+    } else if (eventType === 'DELETE') {
+        reminders = reminders.filter(x => x.id !== Number(o.id));
+    }
+    renderCalendar();
+}
+
+// ═══════════════════════════════════════
+//  DB ↔ 앱 변환
+// ═══════════════════════════════════════
+function toReminder(row) {
+    return {
+        id:          Number(row.id),
+        name:        row.name,
+        location:    row.location,
+        filterType:  row.filter_type,
+        pmType:      row.pm_type || '',
+        days:        row.days,
+        createdDate: row.created_date,
+        checkDate:   row.check_date,
+        checked:     row.checked,
+    };
+}
+function toRow(r) {
+    return {
+        id:           r.id,
+        name:         r.name,
+        location:     r.location,
+        filter_type:  r.filterType,
+        pm_type:      r.pmType || null,
+        days:         r.days,
+        created_date: r.createdDate,
+        check_date:   r.checkDate,
+        checked:      r.checked,
+    };
+}
+
+// ═══════════════════════════════════════
+//  CRUD
+// ═══════════════════════════════════════
+async function loadReminders() {
+    showLoading(true);
+    try {
+        const { data, error } = await sb
+            .from('filter_reminders_honam')
+            .select('*')
+            .order('check_date', { ascending:true });
+        if (error) throw error;
+        reminders = data.map(toReminder);
+        renderCalendar();
+        saveLocalBackup(reminders);  // 🔵 자동 로컬 백업
+
+        // 🟡 Supabase는 OK인데 데이터가 0개 + 로컬 백업이 있으면 제안
+        if (reminders.length === 0) {
+            const backups = getLocalBackups();
+            if (backups.length > 0) {
+                const latest = backups[0];
+                const offer = confirm(
+                    `⚠️ Supabase에 데이터가 없습니다.\n\n` +
+                    `로컬 백업이 있습니다:\n` +
+                    `• ${formatBackupTime(latest.timestamp)} (${latest.count}개)\n\n` +
+                    `가장 최근 백업으로 복원하시겠습니까?`
+                );
+                if (offer) restoreFromLocalBackup();
+            }
+        }
+    } catch(e) {
+        alert('데이터 로드 실패: ' + e.message);
+        // Supabase 연결 실패 시 로컬 백업 제안
+        const backups = getLocalBackups();
+        if (backups.length > 0) {
+            const offer = confirm(
+                `Supabase 연결에 실패했습니다.\n\n` +
+                `로컬 백업이 ${backups.length}개 있습니다.\n` +
+                `복원하시겠습니까? (연결 복구 후 가능)`
+            );
+            if (offer) restoreFromLocalBackup();
+        }
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function insertReminder(r) {
+    showLoading(true);
+    try {
+        const { error } = await sb.from('filter_reminders_honam').insert(toRow(r));
+        if (error) throw error;
+        return true;
+    } catch(e) {
+        alert('등록 실패: ' + e.message);
+        return false;
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function updateChecked(id, checked) {
+    showLoading(true);
+    try {
+        const { error } = await sb.from('filter_reminders_honam').update({ checked }).eq('id', id);
+        if (error) throw error;
+    } catch(e) {
+        alert('업데이트 실패: ' + e.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+async function deleteById(id) {
+    showLoading(true);
+    try {
+        const { error } = await sb.from('filter_reminders_honam').delete().eq('id', id);
+        if (error) throw error;
+    } catch(e) {
+        alert('삭제 실패: ' + e.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ═══════════════════════════════════════
+//  캘린더 렌더
+// ═══════════════════════════════════════
+function renderCalendar() {
+    const year  = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    document.getElementById('currentMonth').textContent = `${year}년 ${month+1}월`;
+
+    const firstDay       = new Date(year, month, 1);
+    const lastDay        = new Date(year, month+1, 0);
+    const prevLastDay    = new Date(year, month, 0);
+    const firstDayIndex  = firstDay.getDay();
+    const lastDayDate    = lastDay.getDate();
+    const prevLastDate   = prevLastDay.getDate();
+
+    let html = '';
+    weekDays.forEach(d => { html += `<div class="calendar-header">${d}</div>`; });
+
+    for (let i = firstDayIndex-1; i >= 0; i--) {
+        html += `<div class="calendar-day other-month"><div class="day-number">${prevLastDate-i}</div></div>`;
+    }
+
+    const today = new Date();
+    for (let day = 1; day <= lastDayDate; day++) {
+        const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const isToday    = today.getDate()===day && today.getMonth()===month && today.getFullYear()===year;
+        const isSelected = selectedDate === dStr;
+        const dow        = new Date(year, month, day).getDay();
+        const isWeekend  = dow===0 || dow===6;
+
+        const dayR       = reminders.filter(r => r.checkDate === dStr);
+        const hasReminder= dayR.length > 0;
+        const isChecked  = dayR.every(r => r.checked) && hasReminder;
+
+        let cls = 'calendar-day';
+        if (isToday && !selectedDate) cls += ' today';
+        if (isSelected) cls += ' selected';
+        if (hasReminder) {
+            cls += ' has-reminder';
+            const ft = dayR[0].filterType?.toLowerCase() || '';
+            if (ft.includes('kimoto'))      cls += ' filter-kimoto';
+            else if (ft.includes('sibata')) cls += ' filter-sibata';
+            else if (ft.includes('bam')) cls += ' filter-metone';
+            else if (ft.includes('em'))     cls += ' filter-em';
+        }
+        if (isChecked) cls += ' checked';
+
+        html += `<div class="${cls}" onclick="handleDayClick('${dStr}')">
+            <div class="${isWeekend?'day-number weekend-day':'day-number'}">${day}</div>
+            ${dayR.map(r => {
+                const ft = r.filterType?.toLowerCase() || '';
+                let bc = '';
+                if (ft.includes('kimoto'))      bc = 'badge-kimoto';
+                else if (ft.includes('sibata')) bc = 'badge-sibata';
+                else if (ft.includes('bam'))    bc = 'badge-metone';
+                else if (ft.includes('em'))     bc = 'badge-em';
+                const sq = searchQuery.toLowerCase();
+                const matched = sq && r.location?.toLowerCase().includes(sq);
+                const dimmed  = sq && !matched;
+                const searchCls = matched ? 'badge-search-match' : dimmed ? 'badge-search-dim' : '';
+                return `<div class="reminder-badge ${bc} ${searchCls} ${r.checked?'completed':''}">${r.name}${r.checked?' ✓':''}</div>`;
+            }).join('')}
+            ${isChecked ? '<div class="check-mark">✓</div>' : ''}
+        </div>`;
+    }
+
+    const remaining = 42 - (firstDayIndex + lastDayDate);
+    for (let day=1; day<=remaining; day++) {
+        html += `<div class="calendar-day other-month"><div class="day-number">${day}</div></div>`;
+    }
+
+    document.getElementById('calendar').innerHTML = html;
+
+    // 검색어가 있으면 날짜 칸 단위 하이라이트/흐리기 적용
+    if (searchQuery) {
+        const sq = searchQuery.toLowerCase();
+        document.querySelectorAll('.calendar-day:not(.other-month)').forEach(cell => {
+            const badges = cell.querySelectorAll('.reminder-badge');
+            const hasMatch = [...badges].some(b => b.classList.contains('badge-search-match'));
+            const hasAny   = badges.length > 0;
+            if (hasMatch)       cell.classList.add('day-search-match');
+            else if (hasAny)    cell.classList.add('day-search-dim');
+        });
+        const matchCount = reminders.filter(r =>
+            r.location?.toLowerCase().includes(sq) &&
+            r.checkDate.startsWith(`${currentDate.getFullYear()}-${String(currentDate.getMonth()+1).padStart(2,'0')}`)
+        ).length;
+        document.getElementById('searchInfo').textContent =
+            matchCount > 0
+                ? `이번 달 "${searchQuery}" 검색 결과: ${matchCount}건`
+                : `이번 달 "${searchQuery}" 검색 결과가 없습니다.`;
+    } else {
+        document.getElementById('searchInfo').textContent = '';
+    }
+
+    renderReminderList();
+}
+
+// ═══════════════════════════════════════
+//  필터교체 목록
+// ═══════════════════════════════════════
+function renderReminderList() {
+    // 🔍 검색어로 필터링 (캘린더와 동일하게 측정소명 기준)
+    let filtered = reminders;
+    if (searchQuery) {
+        const sq = searchQuery.toLowerCase();
+        filtered = reminders.filter(r => r.location?.toLowerCase().includes(sq));
+    }
+
+    // 📅 정렬: 오늘 기준 과거(최근 교체)가 위, 미래(예정)가 아래
+    const today = new Date().toISOString().split('T')[0];
+    const sorted = [...filtered].sort((a, b) => {
+        const aPast = a.checkDate <= today;
+        const bPast = b.checkDate <= today;
+        if (aPast && !bPast) return -1;
+        if (!aPast && bPast) return 1;
+        if (aPast) {
+            // 둘 다 과거/오늘: 최근(큰 날짜) 먼저
+            return new Date(b.checkDate) - new Date(a.checkDate);
+        }
+        // 둘 다 미래: 가까운 것(작은 날짜) 먼저
+        return new Date(a.checkDate) - new Date(b.checkDate);
+    });
+
+    let html;
+    if (reminders.length === 0) {
+        html = '<p style="text-align:center;color:#999;">등록된 필터교체가 없습니다.</p>';
+    } else if (sorted.length === 0) {
+        html = `<p style="text-align:center;color:#999;">"${searchQuery}" 검색 결과가 없습니다.</p>`;
+    } else {
+        html = sorted.map(r => {
+            const created = new Date(r.createdDate).toLocaleDateString('ko-KR');
+            const check   = new Date(r.checkDate).toLocaleDateString('ko-KR');
+            return `
+                <div class="reminder-item ${r.checked?'completed':''}">
+                    <div>
+                        <strong>${r.name}</strong><br>
+                        <small>등록: ${created} → 교체예정: ${check} (${r.days}일) ${r.checked?'✓ 완료':''}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteReminder(${r.id})">삭제</button>
+                </div>`;
+        }).join('');
+    }
+    document.getElementById('reminderList').innerHTML = html;
+}
+
+// ═══════════════════════════════════════
+//  추가
+// ═══════════════════════════════════════
+function addReminder() {
+    const baseDate = document.getElementById('baseDate').value;
+    const location = document.getElementById('locationInput').value.trim();
+    const filter   = document.getElementById('filterType').value;
+
+    if (!baseDate)  { alert('교체날짜를 지정해주세요!'); return; }
+    if (!location)  { alert('측정소명을 입력해주세요!'); return; }
+    if (!filter)    { alert('필터 종류를 선택해주세요!'); return; }
+
+    const [filterBase, pmType] = filter.split('-');
+    const days       = filterDays[filterBase];
+    const name       = filterNames[filterBase];
+
+    const startDate   = new Date(baseDate);
+    const defaultDate = new Date(startDate);
+    defaultDate.setDate(startDate.getDate() + days);
+
+    pendingReminder = {
+        location, filterType: name, pmType, days, baseDate,
+        defaultDate: defaultDate.toISOString().split('T')[0]
+    };
+
+    modalCalendarDate = new Date(defaultDate);
+    modalSelectedDate = pendingReminder.defaultDate;
+
+    document.getElementById('modalLocation').textContent =
+        `${location} - ${name} ${pmType} (권장: ${days}일)`;
+    document.getElementById('selectedDate').value = pendingReminder.defaultDate;
+    document.getElementById('dateModal').style.display = 'flex';
+    renderModalCalendar();
+}
+
+function closeModal() {
+    document.getElementById('dateModal').style.display = 'none';
+    pendingReminder = null;
+    modalSelectedDate = null;
+}
+
+async function confirmDate() {
+    if (!pendingReminder) { closeModal(); return; }
+    const dateVal = document.getElementById('selectedDate').value;
+    if (!dateVal) { alert('날짜를 선택해주세요!'); return; }
+
+    const pmDisplay = pendingReminder.pmType ? ` ${pendingReminder.pmType}` : '';
+    const reminder  = {
+        id:          Date.now(),
+        name:        `${pendingReminder.location} - ${pendingReminder.filterType}${pmDisplay}`,
+        location:    pendingReminder.location,
+        filterType:  pendingReminder.filterType,
+        pmType:      pendingReminder.pmType,
+        days:        pendingReminder.days,
+        createdDate: pendingReminder.baseDate,
+        checkDate:   dateVal,
+        checked:     false
+    };
+
+    const ok = await insertReminder(reminder);
+    if (!ok) return;
+
+    if (!reminders.find(x => x.id === reminder.id)) reminders.push(reminder);
+
+    document.getElementById('baseDate').value = ''; const ph = document.getElementById('datePlaceholder'); if(ph) ph.style.display='block';
+    document.getElementById('locationInput').value = '';
+    document.getElementById('filterType').value = '';
+
+    const loc = pendingReminder.location;
+    const ft  = pendingReminder.filterType;
+    closeModal();
+
+    const [y, m] = dateVal.split('-').map(Number);
+    currentDate  = new Date(y, m-1, 1);
+    selectedDate = dateVal;
+    renderCalendar();
+
+    alert(`"${loc} - ${ft}${pmDisplay}" 등록 완료!\n교체 예정일: ${new Date(dateVal).toLocaleDateString('ko-KR')}`);
+}
+
+// ═══════════════════════════════════════
+//  날짜 클릭
+// ═══════════════════════════════════════
+function handleDayClick(dStr) {
+    selectedDate = dStr;
+    renderCalendar();
+
+    const location = document.getElementById('locationInput').value.trim();
+    const filter   = document.getElementById('filterType').value;
+
+    if (!location || !filter) {
+        toggleCheck(dStr);
+        return;
+    }
+
+    // 입력값이 있으면 클릭한 날짜를 baseDate로 설정 후 모달 열기
+    document.getElementById('baseDate').value = dStr;
+    addReminder();
+}
+
+// ═══════════════════════════════════════
+//  체크 토글
+// ═══════════════════════════════════════
+async function toggleCheck(dStr) {
+    const dayR = reminders.filter(r => r.checkDate === dStr);
+    if (dayR.length === 0) return;
+    if (dayR.length === 1) {
+        const r = dayR[0];
+        await updateChecked(r.id, !r.checked);
+        r.checked = !r.checked;
+        renderCalendar();
+    } else {
+        showReminderSelectionModal(dayR);
+    }
+}
+
+function showReminderSelectionModal(dayR) {
+    document.getElementById('reminderSelectModal')?.remove();
+    const html = `
+        <div id="reminderSelectModal" class="modal" style="display:block;">
+            <div class="modal-content">
+                <div class="modal-header">완료할 필터교체 선택</div>
+                <div style="margin:20px 0;">
+                    ${dayR.map(r => `
+                        <div style="padding:15px;margin:10px 0;background:#f8f9fa;border-radius:8px;cursor:pointer;border:2px solid ${r.checked?'#28a745':'#ddd'};"
+                             onclick="toggleSingleReminder(${r.id})">
+                            <strong>${r.name}</strong>
+                            ${r.checked
+                                ? '<span style="color:#28a745;float:right;">✓ 완료</span>'
+                                : '<span style="color:#999;float:right;">미완료</span>'}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="closeReminderSelectModal()">닫기</button>
+                </div>
+            </div>
+        </div>`;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function toggleSingleReminder(id) {
+    const r = reminders.find(x => x.id === id);
+    if (!r) return;
+    await updateChecked(r.id, !r.checked);
+    r.checked = !r.checked;
+    renderCalendar();
+    const modal = document.getElementById('reminderSelectModal');
+    if (modal) {
+        modal.remove();
+        showReminderSelectionModal(reminders.filter(x => x.checkDate === r.checkDate));
+    }
+}
+
+function closeReminderSelectModal() {
+    document.getElementById('reminderSelectModal')?.remove();
+}
+
+// ═══════════════════════════════════════
+//  삭제
+// ═══════════════════════════════════════
+function deleteReminder(id) {
+    const r = reminders.find(x => x.id === id);
+    if (!r) return;
+    deleteToConfirm = id;
+    document.getElementById('confirmMessage').innerHTML =
+        `<strong>${r.name}</strong><br>이 필터교체를 삭제하시겠습니까?`;
+    document.getElementById('confirmModal').style.display = 'block';
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    deleteToConfirm = null;
+}
+
+async function confirmDelete() {
+    if (!deleteToConfirm) return;
+    await deleteById(deleteToConfirm);
+    reminders = reminders.filter(r => r.id !== deleteToConfirm);
+    closeConfirmModal();
+    renderCalendar();
+}
+
+// ═══════════════════════════════════════
+//  모달 캘린더
+// ═══════════════════════════════════════
+function renderModalCalendar() {
+    const year  = modalCalendarDate.getFullYear();
+    const month = modalCalendarDate.getMonth();
+    document.getElementById('modalMonthDisplay').textContent = `${year}년 ${month+1}월`;
+
+    const firstDay      = new Date(year, month, 1);
+    const lastDay       = new Date(year, month+1, 0);
+    const prevLastDay   = new Date(year, month, 0);
+    const firstDayIndex = firstDay.getDay();
+    const lastDayDate   = lastDay.getDate();
+    const prevLastDate  = prevLastDay.getDate();
+
+    let html = '';
+    weekDays.forEach(d => { html += `<div class="modal-calendar-header">${d}</div>`; });
+    for (let i = firstDayIndex-1; i>=0; i--) {
+        html += `<div class="modal-calendar-day other-month">${prevLastDate-i}</div>`;
+    }
+    const today = new Date();
+    for (let day=1; day<=lastDayDate; day++) {
+        const dStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const isToday    = today.getDate()===day && today.getMonth()===month && today.getFullYear()===year;
+        const isSelected = modalSelectedDate === dStr;
+        let cls = 'modal-calendar-day';
+        if (isToday)    cls += ' today-in-modal';
+        if (isSelected) cls += ' selected-in-modal';
+        html += `<div class="${cls}" onclick="selectModalDate('${dStr}')">${day}</div>`;
+    }
+    const remaining = 42 - (firstDayIndex + lastDayDate) - 7;
+    for (let day=1; day<=remaining; day++) {
+        html += `<div class="modal-calendar-day other-month">${day}</div>`;
+    }
+    document.getElementById('modalCalendar').innerHTML = html;
+}
+
+function selectModalDate(dStr) {
+    modalSelectedDate = dStr;
+    document.getElementById('selectedDate').value = dStr;
+    renderModalCalendar();
+}
+function previousModalMonth() { modalCalendarDate.setMonth(modalCalendarDate.getMonth()-1); renderModalCalendar(); }
+function nextModalMonth()     { modalCalendarDate.setMonth(modalCalendarDate.getMonth()+1); renderModalCalendar(); }
+function previousMonth()      { currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); }
+function nextMonth()          { currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); }
+
+// ═══════════════════════════════════════
+//  유틸
+// ═══════════════════════════════════════
+function showLoading(show) {
+    document.getElementById('loadingOverlay').classList.toggle('show', show);
+}
+
+document.getElementById('locationInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') addReminder();
+});
+
+document.getElementById('selectedDate').addEventListener('change', e => {
+    if (e.target.value) {
+        modalSelectedDate = e.target.value;
+        const [y,m] = e.target.value.split('-').map(Number);
+        modalCalendarDate = new Date(y, m-1, 1);
+        if (document.getElementById('dateModal').style.display === 'block') renderModalCalendar();
+    }
+});
+
+window.onclick = e => {
+    if (e.target === document.getElementById('dateModal'))           closeModal();
+    if (e.target === document.getElementById('reminderSelectModal')) closeReminderSelectModal();
+    if (e.target === document.getElementById('confirmModal'))        closeConfirmModal();
+};
+
+// ═══════════════════════════════════════
+//  날짜 placeholder 토글
+// ═══════════════════════════════════════
+function toggleDatePlaceholder(el) {
+    const ph = document.getElementById('datePlaceholder');
+    if (!ph) return;
+    ph.style.display = el.value ? 'none' : 'block';
+}
+
+// ═══════════════════════════════════════
+//  검색
+// ═══════════════════════════════════════
+function onSearch(val) {
+    searchQuery = val.trim();
+    document.getElementById('searchClear').style.display = searchQuery ? 'inline' : 'none';
+    renderCalendar();
+}
+
+function clearSearch() {
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchClear').style.display = 'none';
+    document.getElementById('searchInfo').textContent = '';
+    renderCalendar();
+}
+
+// ═══════════════════════════════════════
+//  CSV 다운로드 (엑셀용)
+// ═══════════════════════════════════════
+function exportCSV() {
+    if (!reminders || reminders.length === 0) {
+        alert('다운로드할 데이터가 없습니다.');
+        return;
+    }
+
+    // 현재 검색 중이면 검색 결과만, 아니면 전체
+    let data = reminders;
+    if (searchQuery) {
+        const sq = searchQuery.toLowerCase();
+        data = reminders.filter(r => r.location?.toLowerCase().includes(sq));
+        if (data.length === 0) {
+            alert(`"${searchQuery}" 검색 결과가 없습니다.`);
+            return;
+        }
+    }
+
+    // 정렬: 교체예정일 오름차순 (엑셀에서 보기 편하게)
+    const sorted = [...data].sort((a, b) => new Date(a.checkDate) - new Date(b.checkDate));
+
+    // CSV 헤더
+    const headers = ['측정소명', '필터 종류', 'PM 종류', '교체 주기(일)', '등록일', '교체 예정일', '완료 여부'];
+
+    // CSV 이스케이프 (쉼표/따옴표/개행 포함 시 큰따옴표로 감싸기)
+    const esc = v => {
+        const s = String(v ?? '');
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+
+    const rows = sorted.map(r => [
+        esc(r.location),
+        esc(r.filterType),
+        esc(r.pmType || ''),
+        r.days,
+        r.createdDate,
+        r.checkDate,
+        r.checked ? '완료' : '미완료',
+    ].join(','));
+
+    // BOM 추가: 엑셀에서 한글 깨짐 방지
+    const csv = '\uFEFF' + headers.join(',') + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+
+    const now = new Date();
+    const ts  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const filename = searchQuery
+        ? `호남_필터교체목록_${searchQuery}_${ts}.csv`
+        : `호남_필터교체목록_${ts}.csv`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ CSV 다운로드 완료!\n${sorted.length}개 레코드를 CSV 파일로 저장했습니다.${searchQuery ? `\n(검색: "${searchQuery}")` : ''}`);
+}
+
+// ═══════════════════════════════════════
+//  JSON 백업 / 복원
+// ═══════════════════════════════════════
+function exportJSON() {
+    if (!reminders || reminders.length === 0) {
+        alert('백업할 데이터가 없습니다.');
+        return;
+    }
+
+    const json = JSON.stringify(reminders, null, 2);
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+
+    const now = new Date();
+    const ts  = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
+              + `_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `filter_pm_backup_${ts}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    alert(`✅ 백업 완료!\n${reminders.length}개 레코드를 JSON 파일로 저장했습니다.`);
+}
+
+async function importJSON(event) {
+    const fileInput = event.target;
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const proceed = confirm(
+        `📂 파일: ${file.name}\n\n` +
+        `이 JSON 파일의 데이터를 Supabase에 복원합니다.\n\n` +
+        `• id가 이미 존재하는 레코드는 덮어씁니다 (최신 값으로).\n` +
+        `• id가 새로운 레코드는 추가됩니다.\n` +
+        `• 기존 데이터 중 파일에 없는 항목은 유지됩니다.\n\n` +
+        `계속하시겠습니까?`
+    );
+
+    if (!proceed) {
+        fileInput.value = '';
+        return;
+    }
+
+    showLoading(true);
+    try {
+        const text = await file.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            alert('❌ JSON 형식이 올바르지 않습니다.\n' + e.message);
+            return;
+        }
+
+        if (!Array.isArray(data)) {
+            alert('❌ JSON 파일이 배열 형태가 아닙니다.');
+            return;
+        }
+
+        if (data.length === 0) {
+            alert('❌ 파일에 복원할 데이터가 없습니다.');
+            return;
+        }
+
+        // 필수 필드 검증
+        const required = ['id', 'name', 'location', 'filterType', 'days', 'createdDate', 'checkDate'];
+        const missing  = required.filter(k => !(k in data[0]));
+        if (missing.length > 0) {
+            alert(`❌ 필수 필드 누락: ${missing.join(', ')}\n\n이 앱에서 내보낸 JSON 파일이 맞는지 확인해주세요.`);
+            return;
+        }
+
+        // DB 행 형식으로 변환
+        const rows = data.map(r => toRow({
+            id:          Number(r.id),
+            name:        r.name,
+            location:    r.location,
+            filterType:  r.filterType,
+            pmType:      r.pmType || '',
+            days:        Number(r.days),
+            createdDate: r.createdDate,
+            checkDate:   r.checkDate,
+            checked:     Boolean(r.checked),
+        }));
+
+        // upsert: id 충돌 시 업데이트, 없으면 삽입
+        const { error } = await sb.from('filter_reminders_honam').upsert(rows, { onConflict: 'id' });
+        if (error) throw error;
+
+        await loadReminders();
+        alert(`✅ 복원 완료!\n${rows.length}개 레코드를 불러왔습니다.`);
+    } catch (e) {
+        alert('❌ 복원 실패: ' + e.message);
+    } finally {
+        showLoading(false);
+        fileInput.value = ''; // 같은 파일 재선택 가능하도록 초기화
+    }
+}
+
+// ═══════════════════════════════════════
+//  PIN 게이트
+// ═══════════════════════════════════════
+// 🔒 여기 4자리 숫자를 원하는 PIN으로 바꾸세요 (예: '1234', '5678')
+const APP_PIN = '8301';
+const PIN_STORAGE_KEY = 'filter_pm_honam_pin_auth';
+const PIN_REMEMBER_HOURS = 24;
+
+function checkPinAuth() {
+    try {
+        const saved = localStorage.getItem(PIN_STORAGE_KEY);
+        if (!saved) return false;
+        const { expires } = JSON.parse(saved);
+        return Date.now() < expires;
+    } catch { return false; }
+}
+
+function setPinAuth() {
+    const expires = Date.now() + PIN_REMEMBER_HOURS * 60 * 60 * 1000;
+    localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify({ expires }));
+}
+
+function checkPin() {
+    const input    = document.getElementById('pinInput');
+    const errorEl  = document.getElementById('pinError');
+    const remember = document.getElementById('pinRemember').checked;
+    const value    = input.value.trim();
+
+    if (value.length !== 4) {
+        errorEl.textContent = '4자리 숫자를 입력하세요';
+        return;
+    }
+
+    if (value !== APP_PIN) {
+        errorEl.textContent = '❌ PIN 번호가 올바르지 않습니다';
+        input.value = '';
+        input.focus();
+        return;
+    }
+
+    // 성공
+    if (remember) setPinAuth();
+    unlockApp();
+}
+
+function unlockApp() {
+    document.getElementById('pinOverlay').style.display = 'none';
+    document.getElementById('statusBar').style.display  = 'flex';
+    document.querySelector('.container').style.display  = 'block';
+    initApp();
+}
+
+// PIN 엔터키 지원 + 자동 체크
+document.getElementById('pinInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPin();
+});
+document.getElementById('pinInput').addEventListener('input', e => {
+    // 숫자만 허용
+    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+    document.getElementById('pinError').textContent = '';
+    // 4자리 입력되면 자동 체크
+    if (e.target.value.length === 4) {
+        setTimeout(() => checkPin(), 100);
+    }
+});
+
+// ═══════════════════════════════════════
+//  localStorage 자동 백업
+// ═══════════════════════════════════════
+const LOCAL_BACKUP_KEY      = 'filter_pm_honam_local_backups';
+const LOCAL_BACKUP_MAX      = 5;   // 최대 5개 세대 유지
+const LOCAL_BACKUP_MIN_GAP  = 60 * 1000; // 같은 세대 중복 저장 방지: 1분
+let   lastBackupTime        = 0;
+
+function saveLocalBackup(data) {
+    if (!data || data.length === 0) return;
+    const now = Date.now();
+    if (now - lastBackupTime < LOCAL_BACKUP_MIN_GAP) return; // 너무 자주 저장 X
+    lastBackupTime = now;
+
+    try {
+        const all = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY) || '[]');
+        all.unshift({
+            timestamp: now,
+            count:     data.length,
+            data:      data,
+        });
+        // 최대 개수 초과 시 오래된 것 제거
+        const trimmed = all.slice(0, LOCAL_BACKUP_MAX);
+        localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(trimmed));
+        console.log(`[로컬 백업] ${data.length}개 저장 (총 ${trimmed.length}세대)`);
+    } catch (e) {
+        console.warn('[로컬 백업] 실패:', e.message);
+    }
+}
+
+function getLocalBackups() {
+    try {
+        return JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY) || '[]');
+    } catch { return []; }
+}
+
+function formatBackupTime(ts) {
+    const d = new Date(ts);
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+async function restoreFromLocalBackup() {
+    const backups = getLocalBackups();
+    if (backups.length === 0) {
+        alert('저장된 로컬 백업이 없습니다.');
+        return;
+    }
+
+    // 백업 목록 문자열 생성
+    const list = backups.map((b, i) =>
+        `${i+1}. ${formatBackupTime(b.timestamp)}  (${b.count}개)`
+    ).join('\n');
+
+    const choice = prompt(
+        `💾 로컬 백업 목록:\n\n${list}\n\n복원할 백업 번호를 입력하세요 (1~${backups.length}):`,
+        '1'
+    );
+
+    if (!choice) return;
+    const idx = parseInt(choice, 10) - 1;
+    if (isNaN(idx) || idx < 0 || idx >= backups.length) {
+        alert('❌ 올바른 번호를 입력하세요.');
+        return;
+    }
+
+    const backup = backups[idx];
+    const confirmed = confirm(
+        `${formatBackupTime(backup.timestamp)}의 백업을 복원합니다.\n` +
+        `(${backup.count}개 레코드)\n\n` +
+        `기존 데이터와 병합됩니다. id가 같으면 덮어쓰기 됩니다.\n\n계속하시겠습니까?`
+    );
+    if (!confirmed) return;
+
+    showLoading(true);
+    try {
+        const rows = backup.data.map(r => toRow(r));
+        const { error } = await sb.from('filter_reminders_honam').upsert(rows, { onConflict: 'id' });
+        if (error) throw error;
+        await loadReminders();
+        alert(`✅ 로컬 백업 복원 완료!\n${rows.length}개 레코드를 불러왔습니다.`);
+    } catch (e) {
+        alert('❌ 복원 실패: ' + e.message);
+    } finally {
+        showLoading(false);
+    }
+}
+
+// ═══════════════════════════════════════
+//  시작
+// ═══════════════════════════════════════
+if (checkPinAuth()) {
+    // 이미 인증되어 있으면 바로 실행
+    unlockApp();
+} else {
+    // PIN 입력 대기
+    document.getElementById('pinInput').focus();
+}
+</script>
+</body>
+</html>
