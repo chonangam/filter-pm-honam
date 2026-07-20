@@ -249,6 +249,7 @@
         .badge-sibata { background: var(--ios-green); }
         .badge-metone { background: var(--ios-orange); }
         .badge-em     { background: var(--ios-purple); }
+        .badge-thermo { background: var(--ios-pink); }
 
         .reminder-badge.completed {
             background: var(--text-tertiary) !important;
@@ -1035,6 +1036,7 @@ function renderCalendar() {
                 else if (ft.includes('sibata')) bc = 'badge-sibata';
                 else if (ft.includes('bam'))    bc = 'badge-metone';
                 else if (ft.includes('em'))     bc = 'badge-em';
+                else if (ft.includes('thermo')) bc = 'badge-thermo';
                 const sq = searchQuery.toLowerCase();
                 const matched = sq && r.location?.toLowerCase().includes(sq);
                 const dimmed  = sq && !matched;
@@ -1371,7 +1373,7 @@ document.getElementById('selectedDate').addEventListener('change', e => {
         modalSelectedDate = e.target.value;
         const [y,m] = e.target.value.split('-').map(Number);
         modalCalendarDate = new Date(y, m-1, 1);
-        if (document.getElementById('dateModal').style.display === 'block') renderModalCalendar();
+        if (document.getElementById('dateModal').style.display === 'flex') renderModalCalendar();
     }
 });
 
