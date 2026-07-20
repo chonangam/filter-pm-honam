@@ -709,6 +709,8 @@
                 <option value="PM-PM2.5">PM-2.5 (70일)</option>
                 <option value="kimoto-PM10">Kimoto PM-10 (90일)</option>
                 <option value="kimoto-PM2.5">Kimoto PM-2.5 (90일)</option>
+                <option value="thermo-PM10">Thermo PM-10 (365일)</option>
+                <option value="thermo-PM2.5">Thermo PM-2.5 (365일)</option>
             </select>
             <button onclick="addReminder()">추가하기</button>
         </div>
@@ -810,8 +812,8 @@ let deleteToConfirm = null;
 let searchQuery = '';
 
 const weekDays = ['일','월','화','수','목','금','토'];
-const filterDays  = { 'EM':60, 'BAM1022':40, 'PM':70, 'kimoto':90 };
-const filterNames = { 'EM':'EM', 'BAM1022':'BAM-1022', 'PM':'PM', 'kimoto':'Kimoto' };
+const filterDays  = { 'EM':60, 'BAM1022':40, 'PM':70, 'kimoto':90, 'thermo':365 };
+const filterNames = { 'EM':'EM', 'BAM1022':'BAM-1022', 'PM':'PM', 'kimoto':'Kimoto', 'thermo':'Thermo' };
 
 // ═══════════════════════════════════════
 //  Supabase 초기화
